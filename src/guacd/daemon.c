@@ -304,8 +304,23 @@ int main(int argc, char* argv[]) {
 
     }
 
+    /* create socket for AF_INET6 to allow IPv6 bind in case there is no IPv4 address available */
+    sa_family_t family = AF_INET6;
+    current_address = addresses;
+    while (current_address != NULL) {
+
+        if (current_address->ai_family == AF_INET)
+        {
+            family = AF_INET;
+        }
+
+        current_address = current_address->ai_next;
+    }
+    guacd_log(GUAC_LOG_DEBUG, "Selected address family: %s",
+            (family == AF_INET) ? "AF_INET" : "AF_INET6");
+
     /* Get socket */
-    socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+    socket_fd = socket(family, SOCK_STREAM, 0);
     if (socket_fd < 0) {
         guacd_log(GUAC_LOG_ERROR, "Error opening socket: %s", strerror(errno));
         exit(EXIT_FAILURE);
